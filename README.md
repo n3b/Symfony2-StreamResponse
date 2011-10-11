@@ -33,3 +33,38 @@ use it in your controllers
         }
     }
 
+also you can use your own stream wrappers
+
+    <?php
+
+    use n3b\Bundle\Util\HttpFoundation\StreamResponse\StreamResponse,
+        n3b\Bundle\Util\HttpFoundation\StreamResponse\StreamWriterInterface;
+
+    class MyWrapper implements StreamWriterInterface
+    {
+        protected $stream;
+
+        public function __construct($stream)
+        {
+            if(!is_resource $stream)
+                throw new \Exception();
+
+            $this->stream = $stream;
+        }
+
+        public function write()
+        {
+            echo stream_get_contents($this->stream);
+        }
+    }
+
+    class MyController
+    {
+        public function sendStreamAction()
+        {
+            $streamWrapper = new MyWrapper(fopen('http://www.example.com', 'r'));
+            $response = new StreamResponse($streamWrapper);
+
+            return $response;
+        }
+    }
